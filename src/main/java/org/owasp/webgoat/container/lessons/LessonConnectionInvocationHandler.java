@@ -27,8 +27,10 @@ public class LessonConnectionInvocationHandler implements InvocationHandler {
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.getPrincipal() instanceof WebGoatUser user) {
+      // Limpiamos el texto para permitir SOLO letras, números, guiones bajos o medios
+      String safeUsername = user.getUsername().replaceAll("[^a-zA-Z0-9_\\-]", "");
       try (var statement = targetConnection.createStatement()) {
-        statement.execute("SET SCHEMA \"" + user.getUsername() + "\"");
+        statement.execute("SET SCHEMA \"" + safeUsername + "\"");
       }
     }
     try {
